@@ -19,8 +19,7 @@ namespace FormularioInscricao.Models
         [Required(ErrorMessage = "Categoria é obrigatória")]
         public string Categoria { get; set; }
 
-        public string Atividades { get; set; }
-
-        public decimal Valor { get; set; }
+        public string? Atividades { get; set; }
+        public decimal? Valor { get; set; }
     }
 }

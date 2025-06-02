@@ -10,11 +10,11 @@ using FormularioInscricao.Models;
 
 namespace FormularioInscricao.Controllers
 {
-    public class InscricaosController : Controller
+    public class InscricoesController : Controller
     {
         private readonly AppDbContext _context;
 
-        public InscricaosController(AppDbContext context)
+        public InscricoesController(AppDbContext context)
         {
             _context = context;
         }
@@ -22,8 +22,15 @@ namespace FormularioInscricao.Controllers
         // GET: Inscricaos
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Inscricoes.ToListAsync());
+            if (_context == null)
+                return Content("Contexto nulo");
+            if (_context.Inscricoes == null)
+                return Content("DbSet<Inscricoes> nulo");
+
+            var inscricoes = await _context.Inscricoes.ToListAsync();
+            return View(inscricoes);
         }
+
 
         // GET: Inscricaos/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -56,8 +63,10 @@ namespace FormularioInscricao.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nome,Email,Telefone,Categoria,Atividades")] Inscricao inscricao)
         {
-            // Regra de negócio: calcular valor com base na categoria
-            inscricao.Valor = inscricao.Categoria == "Sócio" ? 220m : 400m;
+            if (inscricao.Categoria == "Sócio")
+                inscricao.Valor = 220m;
+            else if (inscricao.Categoria == "Não Sócio")
+                inscricao.Valor = 400m;
 
             if (ModelState.IsValid)
             {
@@ -67,6 +76,7 @@ namespace FormularioInscricao.Controllers
             }
             return View(inscricao);
         }
+
 
 
         // GET: Inscricaos/Edit/5
@@ -84,41 +94,7 @@ namespace FormularioInscricao.Controllers
             }
             return View(inscricao);
         }
-
-        // POST: Inscricaos/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Email,Telefone,Categoria,Atividades,Valor")] Inscricao inscricao)
-        {
-            if (id != inscricao.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(inscricao);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!InscricaoExists(inscricao.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(inscricao);
-        }
+   
 
         // GET: Inscricaos/Delete/5
         public async Task<IActionResult> Delete(int? id)
